@@ -1,7 +1,6 @@
 export type Hex = {
   q: number;
   r: number;
-  s: number;
   y: number;
 };
 

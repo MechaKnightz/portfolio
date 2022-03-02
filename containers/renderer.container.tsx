@@ -13,7 +13,7 @@ export const Renderer = () => {
       <Box position={[1.2, 0, 0]} />
       <OrbitControls />
       <PerspectiveCamera far={100} />
-      <HexRenderer hex={generateData(3)} />
+      <HexRenderer hex={generateData(8)} />
     </Canvas>
   );
 };

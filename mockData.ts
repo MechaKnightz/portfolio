@@ -36,6 +36,7 @@ export const generateData: (q: number) => Hex[] = (q) => {
       data.push({
         q: i,
         r: j,
+        //y: -Math.abs(i) - Math.abs(j),
         y: 0,
       });
     }

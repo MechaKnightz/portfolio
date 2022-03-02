@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { Hex, HEX_RADIUS } from "../types/Hex";
 
-const hexCorners: (
+const hexCornersFlat: (
   center: [number, number, number],
   size: number,
   i: number
 ) => number[] = (center: [number, number, number], size: number, i: number) => {
-  var angle_deg = 60 * i - 30;
+  var angle_deg = 60 * i;
   var angle_rad = (Math.PI / 180) * angle_deg;
   return [
     center[0] + size * 0.95 * Math.cos(angle_rad),
@@ -15,7 +15,38 @@ const hexCorners: (
   ];
 };
 
-const hexPosTopixel: (
+const hexCornersPointy: (
+  center: [number, number, number],
+  size: number,
+  i: number
+) => number[] = (center: [number, number, number], size: number, i: number) => {
+  var angle_deg = 60 * i - 30;
+  var angle_rad = (Math.PI / 180) * angle_deg;
+  return [
+    center[0] + size * 0.95 * Math.cos(angle_rad),
+    center[1],
+    center[2] + size * 0.95 * Math.sin(angle_rad),
+  ];
+};
+
+const hexPosToPixelFlat: (
+  //todo
+  hex: Hex,
+  hexRadius: number
+) => [number, number, number] = (hex: Hex, hexRadius: number) => {
+  const width = 2 * hexRadius;
+  const height = Math.sqrt(3) * hexRadius;
+
+  console.log(hex.y);
+
+  return [
+    hex.q * width * (3 / 4),
+    hex.y,
+    hex.r * width + (hex.q / 2) * hexRadius,
+  ];
+};
+
+const hexPosToPixelPointy: (
   hex: Hex,
   hexRadius: number
 ) => [number, number, number] = (hex: Hex, hexRadius: number) => {
@@ -34,11 +65,10 @@ export const HexRenderer: React.FC<{ hex: Hex[] }> = ({ hex }) => {
     const positions = [];
 
     for (let i = 0; i < hex.length; i++) {
-      const hexPos = hexPosTopixel(hex[i], HEX_RADIUS);
+      const hexPos = hexPosToPixelPointy(hex[i], HEX_RADIUS);
       for (let j = 0; j < 6; j++) {
-        positions.push(...hexCorners(hexPos, HEX_RADIUS, j));
+        positions.push(...hexCornersPointy(hexPos, HEX_RADIUS, j));
       }
-      positions.push(...(hexPos as number[]));
     }
 
     return new Float32Array(positions);
@@ -48,11 +78,16 @@ export const HexRenderer: React.FC<{ hex: Hex[] }> = ({ hex }) => {
     const indices = [];
 
     for (let i = 0; i < hex.length; i++) {
-      for (let j = 0; j < 6; j++) {
-        indices.push(i * 7 + 6);
-        indices.push(i * 7 + (j === 5 ? 0 : j + 1));
-        indices.push(i * 7 + j);
+      for (let j = 0; j < 3; j++) {
+        if (j === 2) {
+          indices.push(i * 6);
+        } else indices.push(i * 6 + j * 2 + 2);
+        indices.push(i * 6 + j * 2 + 1);
+        indices.push(i * 6 + j * 2);
       }
+      indices.push(i * 6 + 4);
+      indices.push(i * 6 + 2);
+      indices.push(i * 6);
     }
     return new Uint32Array(indices);
   }, [hex]);
